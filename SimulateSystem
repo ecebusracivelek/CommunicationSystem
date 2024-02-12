@@ -1,0 +1,313 @@
+
+package proj1ComSys;
+
+
+import java.util.ArrayList;
+
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class SimulateSystem {
+
+    private static Scanner input;
+    private static List<ServiceProvider> providers;
+    private static List<Subscriber> subscribers;
+
+    public static void main(String[] args) {
+        input = new Scanner(System.in);
+        providers = new ArrayList<>();
+        subscribers = new ArrayList<>();
+        mainMenu();
+
+
+    }
+
+    private static int getIntInput() {
+        String nextLine = input.nextLine();
+        int result = 0;
+        for (int i = 0; i < nextLine.length(); i++) {
+            if (!Character.isDigit(nextLine.charAt(i)))  { break; }
+            result = result * 10 + Character.getNumericValue(nextLine.charAt(i));
+        }
+        return result;
+    }
+
+    private static double getDoubleInput() {
+        String nextLine = input.nextLine();
+        double result = 0;
+        boolean isDecimal = false;
+        int decimalPlace = 0;
+        for (int i = 0; i < nextLine.length(); i++) {
+            if (nextLine.charAt(i) == '.' || nextLine.charAt(i) == ',' ) {
+                isDecimal = true;
+                continue;
+            }
+            if (!Character.isDigit(nextLine.charAt(i)))  { break; }
+            if (isDecimal) {
+                decimalPlace++;
+                result += Character.getNumericValue(nextLine.charAt(i)) / Math.pow(10, decimalPlace);
+            } else {
+                result = result * 10 + Character.getNumericValue(nextLine.charAt(i));
+            }
+        }
+        return result;
+    }
+
+    private static Subscriber getSubscriberById(int s_id) {
+        for (Subscriber subscriber : subscribers) {
+            if (subscriber.getS_id() == s_id) {
+                return subscriber;
+            }
+        }
+        return null;
+    }
+
+    private static ServiceProvider getProviderById(int p_id) {
+        for (ServiceProvider provider : providers) {
+            if (provider.getP_id() == p_id) {
+                return provider;
+            }
+        }
+        return null;
+    }
+
+
+    private static void mainMenu() {
+        System.out.println(
+                "1- Creating a new Service Provider\n" +
+                "2- Create a new Subscriber\n" +
+                "3- Voice Call: A subscriber calls another subscriber\n" +
+                "4- Messaging: A subscriber sends a message to another subscriber\n" +
+                "5- Internet: A subscriber connects to the Internet\n" +
+                "6- Pay Invoice: A subscriber pays his/her invoice\n" +
+                "7- Change ServiceProvider: A subscriber changes his/her provider\n" +
+                "8- Change Limit: A subscriber changes his/her usage limit for the Invoice\n" +
+                "9- List all Subscribers (show s_id, isActive, s_provider, invoice)\n" +
+                "10- List all Service Providers (show p_id, p_name, all costs, and discount)\n" +
+                "11- Exit"
+        );
+        int choice = getIntInput();
+
+        switch (choice) {
+            case 1:
+                createServiceProvider();
+                break;
+            case 2:
+                createSubscriber();
+                break;
+            case 3:
+                executeVoiceCall();
+                break;
+            case 4:
+                executeMessaging();
+                break;
+            case 5:
+                executeInternet();
+                break;
+            case 6:
+                payInvoice();
+                break;
+            case 7:
+                changeServiceProvider();
+                break;
+            case 8:
+                changeLimit();
+                break;
+            case 9:
+                listAllSubscribers();
+                break;
+            case 10:
+                listAllServiceProviders();
+                break;
+            case 11:
+                exit();
+            default:
+                System.out.println("Invalid choice. Please try again.\n\n");
+                mainMenu();
+        }
+    }
+
+    private static void createServiceProvider() {
+        System.out.println("Enter the name of the new Service Provider:");
+        String name = input.nextLine();
+        System.out.println("Enter the cost of voice call:");
+        double voiceCallCost = getDoubleInput();
+        System.out.println("Enter the cost of messaging:");
+        double messagingCost = getDoubleInput();
+        System.out.println("Enter the cost of internet:");
+        double internetCost = getDoubleInput();
+        System.out.println("Enter the discount:");
+        int discount = getIntInput();
+        providers.add(new ServiceProvider(name, voiceCallCost, messagingCost, internetCost, discount));
+        System.out.println("New Service Provider created successfully.\n\n");
+        mainMenu();
+    }
+
+    private static void createSubscriber() {
+        System.out.println("Enter the name of the new Subscriber:");
+        String name = input.nextLine();
+        System.out.println("Enter the age of the new Subscriber:");
+        int age = getIntInput();
+        System.out.println("Enter the Service Provider ID:");
+        int providerId = getIntInput();
+        System.out.println("Enter the usage limit:");
+        double usageLimit = getDoubleInput();
+        subscribers.add(new Subscriber(name, age, getProviderById(providerId), usageLimit));
+        System.out.println("New Subscriber created successfully.\n\n");
+        mainMenu();
+    }
+
+    private static void executeVoiceCall() {
+        System.out.println("Enter the Subscriber ID of the sender:");
+        int subscriberId = getIntInput();
+        System.out.println("Enter the Subscriber ID of the receiver:");
+        int receiverId = getIntInput();
+        System.out.println("Enter the duration of the call:");
+        int duration = getIntInput();
+        Subscriber x=new Subscriber();
+        x.makeVoiceCall(duration, getSubscriberById(receiverId));
+        System.out.println("Voice Call executed successfully.\n\n");
+        mainMenu();
+    }
+
+    private static void executeMessaging() {
+        System.out.println("Enter the Subscriber ID of the sender:");
+        int subscriberId = getIntInput();
+        System.out.println("Enter the Subscriber ID of the receiver:");
+        int receiverId = getIntInput();
+        System.out.println("Enter the amount of messages:");
+        int messageAmount = getIntInput();
+        getSubscriberById(subscriberId).sendMessage(messageAmount, getSubscriberById(receiverId));
+        System.out.println("Message sent successfully.\n\n");
+        mainMenu();
+    }
+
+    private static void executeInternet() {
+        System.out.println("Enter the Subscriber ID:");
+        int subscriberId = getIntInput();
+        System.out.println("Enter the amount of data:");
+        double dataAmount = getDoubleInput();
+        getSubscriberById(subscriberId).connectToInternet(dataAmount);
+        System.out.println("Internet connection executed successfully.\n\n");
+        mainMenu();
+    }
+
+
+    private static void payInvoice() {
+        System.out.println("Enter the Subscriber ID:");
+        int subscriberId = getIntInput();
+        System.out.println("Enter the amount of money to pay:");
+        double amount = getDoubleInput();
+        getSubscriberById(subscriberId).getInvoice().pay(amount);
+        System.out.println("Invoice paid successfully.\n\n");
+        mainMenu();
+    }
+
+
+    private static void changeServiceProvider() {
+        System.out.println("Enter the Subscriber ID:");
+        int subscriberId = getIntInput();
+        System.out.println("Enter the new Service Provider ID:");
+        int providerId = getIntInput();
+        getSubscriberById(subscriberId).changeServiceProvider(getProviderById(providerId));
+        System.out.println("Service Provider changed successfully.\n\n");
+        mainMenu();
+    }
+
+
+    private static void changeLimit() {
+        System.out.println("Enter the Subscriber ID:");
+        int subscriberId = getIntInput();
+        System.out.println("Enter the new usage limit:");
+        double usageLimit = getDoubleInput();
+        getSubscriberById(subscriberId).getInvoice().changeUsageLimit(usageLimit);
+        System.out.println("Usage limit changed successfully.\n\n");
+        mainMenu();
+    }
+
+
+
+    private static void listAllSubscribers() {
+        System.out.println("\n\n");
+        System.out.println("Subscribers:\n" +
+                "s_id\tisActive\ts_provider\tcurrentSpending\n");
+        for (Subscriber subscriber : subscribers) {
+            System.out.println(subscriber);
+        }
+
+        System.out.println("Enter any key to continue...");
+        input.nextLine();
+        System.out.println("\n\n");
+        mainMenu();
+    }
+
+    private static void listAllServiceProviders() {
+        System.out.println("\n\n");
+        System.out.println("Service Providers:\n" +
+                "p_id\tp_name\tvoiceCallCost\tmessagingCost\tinternetCost\tdiscount\n");
+        for (ServiceProvider provider : providers) {
+            System.out.println(provider);
+        }
+
+        System.out.println("Enter any key to continue...");
+        input.nextLine();
+
+        System.out.println("\n\n");
+        mainMenu();
+    }
+
+    private static void exit() {
+        //Service Providers
+        System.out.println("\n\n");
+        System.out.println("Service Providers:");
+        System.out.println("p_id : <total voice call time> <total number of messages> <total MBs of Internet usage>");
+        for (ServiceProvider provider : providers) {
+            System.out.println(provider.getP_id() + " : " + provider.getTotalCallTime() + " " + provider.getTotalMessages() + " " + provider.getTotalInternetUsage());
+        }
+
+        //Subscriber statistics
+        System.out.println("\n\n");
+        System.out.println("Subscribers:");
+        System.out.println("s_id : <total spending> <current spending>");
+        for (Subscriber subscriber : subscribers) {
+            System.out.println(subscriber.getS_id() + " : " + subscriber.getInvoice().getTotalSpending() + " " + subscriber.getInvoice().getCurrentSpending());
+        }
+              System.out.println("\n\n");
+        System.out.println("Subscriber with the most amount of total voice call time in terms of minutes during the simulation:");
+        System.out.println("s_id\tname\ttotal voice call time");
+        Subscriber subscriberWithMostCallTime = new Subscriber();
+        for (Subscriber subscriber : subscribers) {
+            if (subscriber.getS_provider().getTotalCallTime() > subscriberWithMostCallTime.getS_provider().getTotalCallTime()) {
+                subscriberWithMostCallTime = subscriber;
+            }
+        }
+        System.out.println(subscriberWithMostCallTime.getS_id() + "\t" + subscriberWithMostCallTime.getName() + "\t" + subscriberWithMostCallTime.getS_provider().getTotalCallTime());
+
+        System.out.println("\n\n");
+        System.out.println("Subscriber who sent the most number of messages during the simulation:");
+        System.out.println("s_id\tname\ttotal number of messages");
+        Subscriber subscriberWithMostMessages = new Subscriber();
+        for (Subscriber subscriber : subscribers) {
+            if (subscriber.getS_provider().getTotalMessages() > subscriberWithMostMessages.getS_provider().getTotalMessages()) {
+                subscriberWithMostMessages = subscriber;
+            }
+        }
+        System.out.println(subscriberWithMostMessages.getS_id() + "\t" + subscriberWithMostMessages.getName() + "\t" + subscriberWithMostMessages.getS_provider().getTotalMessages());
+
+        System.out.println("\n\n");
+        System.out.println("Subscriber who got connected the Internet the most during the simulation:");
+        System.out.println("s_id\tname\ttotal amount of Internet usage");
+        Subscriber subscriberWithMostInternetUsage = new Subscriber();
+        for (Subscriber subscriber : subscribers) {
+            if (subscriber.getS_provider().getTotalInternetUsage() > subscriberWithMostInternetUsage.getS_provider().getTotalInternetUsage()) {
+                subscriberWithMostInternetUsage = subscriber;
+            }
+        }
+        System.out.println(subscriberWithMostInternetUsage.getS_id() + "\t" + subscriberWithMostInternetUsage.getName() + "\t" + subscriberWithMostInternetUsage.getS_provider().getTotalInternetUsage());
+
+
+        System.exit(1);
+    }
+}
